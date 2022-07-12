@@ -8,8 +8,9 @@ import Head from 'next/head'
 import { CMS_NAME } from '@/lib/constants'
 
 export default function Index({ allPosts, preview }) {
-  const heroPost = allPosts[0]
-  const morePosts = allPosts.slice(1)
+  const heroPost = allPosts.data[0]?.attributes
+  const morePosts = allPosts.data.slice(1)
+
   return (
     <>
       <Layout preview={preview}>
@@ -21,9 +22,9 @@ export default function Index({ allPosts, preview }) {
           {heroPost && (
             <HeroPost
               title={heroPost.title}
-              coverImage={heroPost.coverImage}
-              date={heroPost.date}
-              author={heroPost.author}
+              coverImage={heroPost.image.data.attributes}
+              date={heroPost.publishedAt}
+              author={heroPost.author.data.attributes}
               slug={heroPost.slug}
               excerpt={heroPost.excerpt}
             />
@@ -37,6 +38,7 @@ export default function Index({ allPosts, preview }) {
 
 export async function getStaticProps({ preview = null }) {
   const allPosts = (await getAllPostsForHome(preview)) || []
+
   return {
     props: { allPosts, preview },
   }

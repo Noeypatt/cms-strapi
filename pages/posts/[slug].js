@@ -13,9 +13,9 @@ import Head from 'next/head'
 import { CMS_NAME } from '@/lib/constants'
 import markdownToHtml from '@/lib/markdownToHtml'
 
-export default function Post({ post, morePosts, preview }) {
+export default function Post({ post: { attributes }, morePosts, preview }) {
   const router = useRouter()
-  if (!router.isFallback && !post?.slug) {
+  if (!router.isFallback && !attributes.slug) {
     return <ErrorPage statusCode={404} />
   }
   return (
@@ -29,17 +29,17 @@ export default function Post({ post, morePosts, preview }) {
             <article>
               <Head>
                 <title>
-                  {post.title} | Next.js Blog Example with {CMS_NAME}
+                  {attributes.title} | Next.js Blog Example with {CMS_NAME}
                 </title>
-                <meta property="og:image" content={post.ogImage.url} />
+                {/* <meta property="og:image" content={post.ogImage.url} /> */}
               </Head>
               <PostHeader
-                title={post.title}
-                coverImage={post.coverImage}
-                date={post.date}
-                author={post.author}
+                title={attributes.title}
+                coverImage={attributes.image.data.attributes}
+                date={attributes.publishedAt}
+                author={attributes.author.data.attributes}
               />
-              <PostBody content={post.content} />
+              <PostBody content={attributes.content} />
             </article>
             <SectionSeparator />
             {morePosts.length > 0 && <MoreStories posts={morePosts} />}
@@ -52,16 +52,17 @@ export default function Post({ post, morePosts, preview }) {
 
 export async function getStaticProps({ params, preview = null }) {
   const data = await getPostAndMorePosts(params.slug, preview)
-  const content = await markdownToHtml(data?.posts[0]?.content || '')
-
+  const post = data?.articles.data
+  const morePosts = data?.morePosts.data
+  const content = await markdownToHtml(post[0].attributes?.content || '')
   return {
     props: {
       preview,
       post: {
-        ...data?.posts[0],
+        ...post[0],
         content,
       },
-      morePosts: data?.morePosts,
+      morePosts: morePosts,
     },
   }
 }
@@ -69,7 +70,7 @@ export async function getStaticProps({ params, preview = null }) {
 export async function getStaticPaths() {
   const allPosts = await getAllPostsWithSlug()
   return {
-    paths: allPosts?.map((post) => `/posts/${post.slug}`) || [],
+    paths: allPosts?.data?.map((post) => `/posts/${post.attributes.slug}`) || [],
     fallback: true,
   }
 }

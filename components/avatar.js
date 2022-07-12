@@ -7,9 +7,7 @@ export default function Avatar({ name, picture }) {
     <div className="flex items-center">
       <div className="w-12 h-12 relative mr-4">
         <Image
-          src={`${
-            url.startsWith('/') ? process.env.NEXT_PUBLIC_STRAPI_API_URL : ''
-          }${url}`}
+          src={`${url.startsWith('/') ? process.env.NEXT_PUBLIC_STRAPI_API_URL : ''}${url}`}
           layout="fill"
           className="rounded-full"
           alt={name}
